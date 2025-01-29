@@ -1,0 +1,34 @@
+import networkx as nx
+import osmnx as ox
+import matplotlib.pyplot as plt
+
+# 1. Çalışma alanını belirle (İTÜ Kampüsü)
+place_name = "Istanbul Technical University, Istanbul, Turkey"
+G = ox.graph_from_place(place_name, network_type='walk')
+
+# 2. Başlangıç ve hedef noktaları belirle (Koordinatlar örnek olarak alınmıştır)
+start_lat, start_lon = 41.1052, 29.0236  # Örnek: Süleyman Demirel Kültür Merkezi
+end_lat, end_lon = 41.1069, 29.0194  # Örnek: KSB Binası
+
+# 3. En yakın düğümleri (node) bul
+orig_node = ox.distance.nearest_nodes(G, X=start_lon, Y=start_lat)
+dest_node = ox.distance.nearest_nodes(G, X=end_lon, Y=end_lat)
+
+# 4. En kısa yolu hesapla (Dijkstra Algoritması)
+route = nx.shortest_path(G, orig_node, dest_node, weight='length')
+
+# 5. Rotayı görselleştir
+fig, ax = ox.plot_graph_route(G, route, route_linewidth=6, node_size=0, bgcolor='w', show=False, close=False)
+plt.title("İTÜ Kampüsü Yaya Rota Optimizasyonu")
+plt.show()
+
+# 6. Rota uzunluğunu hesapla
+route_length = nx.shortest_path_length(G, orig_node, dest_node, weight='length')
+print(f"Rota uzunluğu: {route_length:.2f} metre")
+
+# 7. Rotayı GeoJSON formatında kaydet
+route_gdf = ox.utils_graph.route_to_gdf(G, route)
+route_gdf.to_file("output/itu_route.geojson", driver="GeoJSON")
+
+
+
